@@ -78,8 +78,9 @@ bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 nova_config = Barclamp::Config.load("openstack", "nova")
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
-service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
-                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
+service_plugins = ["firewall"]
+service_plugins.push("metering") if node.roles.include? "ceilometer-agent"
+
 if neutron[:neutron][:use_lbaas]
   lbaas_plugin = if neutron[:neutron][:lbaasv2_driver] == "octavia"
     "neutron_lbaas.services.loadbalancer.proxy_plugin.LoadBalancerProxyPluginv2"
@@ -91,11 +92,11 @@ if neutron[:neutron][:use_lbaas]
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2"
-  service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
+  service_plugins.unshift("router")
 
   if neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge") ||
       neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
-    service_plugins.push("neutron.services.trunk.plugin.TrunkPlugin")
+    service_plugins.push("trunk")
   end
 
   if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
