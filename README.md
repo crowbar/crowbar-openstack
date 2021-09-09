@@ -9,10 +9,8 @@ originally developed by the [Dell CloudEdge Solutions Team](http://dell.com/open
 
 ## Badges
 
-[![Build Status](https://travis-ci.org/crowbar/crowbar-openstack.svg?branch=master)](https://travis-ci.org/crowbar/crowbar-openstack)
 [![Code Climate](https://codeclimate.com/github/crowbar/crowbar-openstack/badges/gpa.svg)](https://codeclimate.com/github/crowbar/crowbar-openstack)
 [![Test Coverage](https://codeclimate.com/github/crowbar/crowbar-openstack/badges/coverage.svg)](https://codeclimate.com/github/crowbar/crowbar-openstack)
-[![Dependency Status](https://gemnasium.com/crowbar/crowbar-openstack.svg)](https://gemnasium.com/crowbar/crowbar-openstack)
 [![Join the chat at https://gitter.im/crowbar/crowbar](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/crowbar/crowbar)
 
 ## Contact
