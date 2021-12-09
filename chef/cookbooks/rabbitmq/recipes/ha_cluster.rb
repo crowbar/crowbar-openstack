@@ -122,7 +122,7 @@ pacemaker_primitive service_name do
   op node[:rabbitmq][:ha][:clustered_op]
   meta ({
     "migration-threshold" => "10",
-    "failure-timeout" => "30s",
+    "failure-timeout" => "1800s",
     "resource-stickiness" => "100"
   })
   action :update

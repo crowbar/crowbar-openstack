@@ -42,13 +42,14 @@ default[:rabbitmq][:ha][:storage][:mode] = nil
 default[:rabbitmq][:ha][:op][:start][:timeout] = "300s"
 default[:rabbitmq][:ha][:op][:promote][:timeout] = "180s"
 default[:rabbitmq][:ha][:op][:monitor][:interval] = "10s"
-default[:rabbitmq][:ha][:clustered_op][:start][:timeout] = "360s"
-default[:rabbitmq][:ha][:clustered_op][:stop][:timeout] = "120s"
-default[:rabbitmq][:ha][:clustered_op][:promote][:timeout] = "120s"
-default[:rabbitmq][:ha][:clustered_op][:demote][:timeout] = "120s"
+default[:rabbitmq][:ha][:clustered_op][:start][:timeout] = "540s"
+default[:rabbitmq][:ha][:clustered_op][:stop][:timeout] = "180s"
+default[:rabbitmq][:ha][:clustered_op][:promote][:timeout] = "180s"
+default[:rabbitmq][:ha][:clustered_op][:demote][:timeout] = "180s"
 default[:rabbitmq][:ha][:clustered_op][:notify][:timeout] = "180s"
 default[:rabbitmq][:ha][:clustered_op][:monitor] = [
-  { interval: "30s" }, { interval: "27s", role: "Master" }
+  { interval: "60s", timeout: "90s" },
+  { interval: "57s", timeout: "90s", role: "Master" }
 ]
 
 default[:rabbitmq][:hipe_compile] = false
