@@ -31,7 +31,7 @@ $(document).ready(function($) {
   {
     //FIXME: right now, there's no good way to localize strings in js :/
     if (confirm("All volumes in the backend will be made unavailable; do you really want to delete this backend?")) {
-      volume_entry = $(this).data("volumeid");
+      var volume_entry = $(this).data("volumeid");
 
       // delete the backend entry from the attributes JSON
       $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
@@ -66,8 +66,7 @@ $(document).ready(function($) {
         $('#backend_entries').html()
       );
     }
-    volumes = $('#proposal_attributes').readJsonAttribute('volumes', {});
-    volume_defaults = $('#proposal_attributes').readJsonAttribute('volume_defaults', {});
+    var volumes = $('#proposal_attributes').readJsonAttribute('volumes', {});
 
     // Render forms for backend list
     $('#cinder_backends').replaceWith(
