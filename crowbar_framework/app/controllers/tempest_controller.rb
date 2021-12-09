@@ -34,17 +34,32 @@ class TempestController < BarclampController
     if (request.post? or request.put?) and params[:id] == "clear"
       @service_object.clear_test_runs
       flash[:notice] = t "barclamp.#{@bc_name}.dashboard.clear.success"
+
+      respond_to do |format|
+        format.json { render json: @test_runs }
+        format.html { redirect_to tempest_dashboard_url }
+      end
+
     # POST /tempest/test_runs
     elsif request.post? or request.put?
       begin
         test_run = @service_object.run_test params[:node]
         flash[:notice] = t "barclamp.#{@bc_name}.run.success", node: params[:node]
       rescue TempestService::ServiceError => error
-        flash[:notice] = t "barclamp.#{@bc_name}.run.failure", node: params[:node], error: error
+        flash[:alert] = t "barclamp.#{@bc_name}.run.failure", node: params[:node], error: error
+
+        respond_to do |format|
+          format.json { render json: @test_runs }
+          format.html { redirect_to tempest_dashboard_url }
+        end
       end
 
-      # supporting REST style interface
-      render text: "/#{@bc_name}/test_runs/#{test_run["uuid"]}" if request.xhr?
+      logger.debug "test run result: #{test_run.inspect}"
+      respond_to do |format|
+        # Does not work, a the results do not exist before run has finished
+        # format.html { redirect_to "/#{@bc_name}/results/#{test_run['uuid']}.html" }
+        format.html { redirect_to tempest_dashboard_url }
+      end
 
     # GET /tempest/test_runs/<test-run-id>
     elsif uuid = params[:id]
@@ -59,7 +74,7 @@ class TempestController < BarclampController
       @test_runs = @service_object.get_test_runs
       respond_to do |format|
         format.json { render json: @test_runs }
-        format.html { redirect_to "/#{@bc_name}/dashboard" } # redirect to dashboard
+        format.html { redirect_to tempest_dashboard_url }
       end
     end
   end
