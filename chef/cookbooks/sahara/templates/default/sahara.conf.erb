@@ -3,7 +3,6 @@ debug = <%= node[:sahara][:debug] %>
 log_dir = /var/log/sahara
 transport_url = <%= @rabbit_settings[:url] %>
 use_syslog=<%= node[:sahara][:use_syslog] ? "True" : "False" %>
-wsgi_keep_alive = false
 host = <%= @bind_host %>
 port = <%= @bind_port %>
 use_namespaces = true

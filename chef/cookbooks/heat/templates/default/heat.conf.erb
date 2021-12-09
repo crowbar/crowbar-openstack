@@ -78,9 +78,6 @@ insecure = <%= @keystone_settings['insecure'] %>
 [database]
 connection = <%= @database_connection %>
 
-[eventlet_opts]
-wsgi_keep_alive = false
-
 [heat_api]
 bind_host = <%= @bind_host %>
 bind_port = <%= @api_port %>

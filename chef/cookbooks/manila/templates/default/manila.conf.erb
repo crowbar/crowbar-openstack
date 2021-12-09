@@ -15,7 +15,6 @@ osapi_share_listen=<%= @bind_host %>
 osapi_share_listen_port=<%= @bind_port %>
 osapi_share_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 max_header_line = <%= node[:manila][:max_header_line] %>
-wsgi_keep_alive = false
 ssl_ca_file=<%= node[:manila][:ssl][:ca_certs] if node[:manila][:api][:protocol] == 'https' && node[:manila][:ssl][:cert_required] %>
 ssl_cert_file=<%= node[:manila][:ssl][:certfile] if node[:manila][:api][:protocol] == 'https' %>
 ssl_key_file=<%= node[:manila][:ssl][:keyfile] if node[:manila][:api][:protocol] == 'https' %>
