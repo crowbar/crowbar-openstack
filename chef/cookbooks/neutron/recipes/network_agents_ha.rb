@@ -149,6 +149,9 @@ if use_l3_agent
       agent "systemd:neutron-l3-ha-service"
       op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
       action :update
+      meta ({
+        "failure-timeout" => "600s"
+      })
       only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
     ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
