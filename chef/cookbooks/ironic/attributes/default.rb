@@ -20,6 +20,7 @@ when "rhel", "suse"
       "openstack-ironic",
       "openstack-ironic-api",
       "openstack-ironic-conductor",
+      "openstack-ironic-image-x86_64",
       "python-ironicclient",
       "python-openstackclient",
       "qemu-tools"
